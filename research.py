@@ -88,14 +88,14 @@ def matching_letters(cropped):
             letter = i[0]
         print min_val
 
-    if min_value < (-5700000):
-        print "testing_1"
-        return letter
-
-    else:
-        print "testing_2"
-        return ''
-
+    # if min_value < (-5700000):
+    #     print "testing_1"
+    #     return letter
+    #
+    # else:
+    #     print "testing_2"
+    #     return ''
+    return letter
 
 def main():
     global original_image
