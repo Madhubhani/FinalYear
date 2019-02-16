@@ -17,10 +17,6 @@ def arg_parser():
     return args["image"]
 
 
-# for f in (files):
-#     parse_pdf(f)
-
-
 def processor(image):
 
     image = cv2.imread(image)
@@ -39,7 +35,7 @@ def save_to_file(letters):
     return file
 
 
-def finding_contours(image, canny_img):
+def finding_contours(image, canny_img, count):
 
     (im2, contours, hierarchy) = cv2.findContours(canny_img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     # print (contours)
@@ -58,74 +54,87 @@ def finding_contours(image, canny_img):
 
 
     else:
-        crop_img = image[y: (y+1) + h, x: (x+2) + (w-1)]
+        x = x+1
+        y = y+1
+        w=w-2
+        h=h-2
+        crop_img = image[y: (y+2) + (h-1), x: (x+2) + (w-1)]
+        # crop_img = image[y: (y-2) + (h-2), x: (x+2) + (w-2)]
 
         dim = (26, 50)
 
         sized_image = cv2.resize(crop_img, dim, interpolation=cv2.INTER_AREA)
 
+        #Invert the colors of the image
+        sized_image = (255 - sized_image)
+
         letter = matching_letters(sized_image)
 
-
-    print(letter)
-
-    print("testing near plate")
-    # cv2.imshow("Sized Image", sized_image)
+        # cv2.imshow("Sized_Image_%d" %count, sized_image)
+        # cv2.imwrite("Output/Sized_Image_%d.jpg" %count, sized_image)
 
     return letter
 
 
 def matching_letters(cropped):
 
-
     s = ['0.jpg', '1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg', '6.jpg', '7.jpg', '8.jpg', '9.jpg',
          'A.jpg', 'B.jpg', 'C.jpg', 'D.jpg', 'E.jpg', 'F.jpg', 'G.jpg', 'H.jpg', 'I.jpg', 'J.jpg',
          'K.jpg', 'L.jpg', 'M.jpg', 'N.jpg', 'O.jpg', 'P.jpg', 'Q.jpg', 'R.jpg', 'S.jpg', 'T.jpg',
-         'U.jpg', 'V.jpg', 'W.jpg', 'X.jpg', 'Y.jpg', 'Z.jpg']
+         'U.jpg', 'V.jpg', 'W.jpg', 'X.jpg', 'Y.jpg', 'Z.jpg', '10.jpg', '70.jpg', '#.jpg']
 
     max_value = 1
 
     for i in s:
 
         #Load the image in gray scale
-        template = cv2.imread(i)    ######,0
+        template = cv2.imread(i, 0)
 
         res = cv2.matchTemplate(cropped, template, cv2.TM_CCOEFF)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-        max_val = abs(max_val)
 
         #abs(max_val) gives the highest value
         if max_val > max_value:
             max_value = max_val
             letter = i[0]
-    # print (max_val)s
 
-    # if max_val > (5000000):
-    #     print ("testing_1")
-    #     return letter
-    #
-    # else:
-    #     print ("testing_2")
-    #     return ''
     return letter
+
 
 def main():
     global original_image
     plate = ''
 
-    d = ['data/30.jpg', 'data/31.jpg', 'data/32.jpg', 'data/33.jpg', 'data/34.jpg', 'data/35.jpg', 'data/36.jpg', 'data/37.jpg', 'data/38.jpg', 'data/39.jpg']
+    # d=['data1/3.jpg']
+
+    # d = ['data1/1.jpg', 'data1/2.jpg', 'data1/3.jpg', 'data1/4.jpg', 'data1/5.jpg', 'data1/6.jpg', 'data1/7.jpg',
+    #      'data1/8.jpg', 'data1/9.jpg']
+
+    d = ['data2/0.jpg', 'data2/1.jpg', 'data2/2.jpg', 'data2/3.jpg', 'data2/4.jpg', 'data2/5.jpg', 'data2/6.jpg',
+         'data2/7.jpg', 'data2/8.jpg', 'data2/9.jpg']
+
+    # d = ['data3/0.jpg', 'data3/1.jpg', 'data3/2.jpg', 'data3/3.jpg', 'data3/4.jpg', 'data3/5.jpg', 'data3/6.jpg',
+    #      'data3/7.jpg', 'data3/8.jpg']
+
+    # d = ['data4/1.jpg', 'data4/2.jpg', 'data4/3.jpg', 'data4/4.jpg', 'data4/5.jpg', 'data4/6.jpg', 'data4/7.jpg',
+    #      'data4/8.jpg', 'data4/9.jpg']
+
+    # d = ['data5/1.jpg', 'data5/2.jpg', 'data5/3.jpg', 'data5/4.jpg', 'data5/5.jpg', 'data5/6.jpg', 'data5/7.jpg']
+
+    count = 0
+
     for i in d:
 
         # image_name = arg_parser()
         original_image, gray_image, canny = processor(i)
-        letter = finding_contours(original_image, canny)
+        letter = finding_contours(gray_image, canny, count)
 
         plate = plate + letter
 
-        cv2.imshow("Original Image", original_image)
-        cv2.imshow("Gray_Image", gray_image)
-        cv2.imshow("Canny_Image", canny)
-        # cv2.imshow("Rectangular_Image", rec_image)
+        # cv2.imwrite("Output/Gray_%d.jpg" %count, gray_image)
+        # cv2.imwrite("Output/Canny_Image_%d.jpg" %count, canny)
+
+        count=count+1
 
     save_to_file(plate)
     print(plate)
