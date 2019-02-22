@@ -112,8 +112,6 @@ def matching_letters(cropped, count):
 
         res = cv2.matchTemplate(cropped, template, cv2.TM_CCOEFF)
 
-        cv2.imwrite("Output/matchTemplate/resultImages_%d.jpg" % count, res)
-
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 
         if max_val > max_value:
